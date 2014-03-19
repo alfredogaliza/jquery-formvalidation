@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<title>Validação</title> 
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery-validation.js"></script>
+	</head>
+	<body>
+		<form id="myform">					
+			Nome: <input type="text" id="nome" name="nome"/>
+				<span class="validator" data-type="required" data-element="nome">Nome obrigatório.</span>
+			<br />
+			Idade: <input type="text" id="idade" name="idade"/>
+				<span class="validator" data-type="required" data-element="idade">Idade obrigatória.</span>
+				<span class="validator" data-type="min-value" data-min="18" data-element="idade">Deve ser maior de 18 anos.</span><br />
+			Endereço:<textarea id="endereco" name="endereco"></textarea>
+				<span class="validator" data-type="max-length" data-max="5" data-element="endereco">Endereço muito grande (&gt;5).</span><br />
+			Mês:
+			<input type="radio" name="mes" value="Jan" id="jan"/>Jan
+			<input type="radio" name="mes" value="Fev" />Fev
+			<input type="radio" name="mes" value="Mar" />Mar
+				<span class="validator" data-type="checked" data-element="jan">Selecione o Mês Janeiro.</span>
+			<br />			
+			<select name="sexo" id="sexo">
+				<option value="">Selecione uma opção...</option>
+				<option value="M">Masculino</option>
+				<option value="F">Feminino</option>
+			</select>
+				<span class="validator" data-type="equals" data-ref="M" data-element="sexo">Selecione o sexo masculino.</span><br />
+			<input type="checkbox" value="1" name="aceito" id="aceito" />Li e aceito
+				<span class="validator" data-type="checked" data-element="aceito">Marque a caixa de seleção.</span><br />			
+			<input type="submit">
+		</form>
+		<script>
+				$("#myform").formValidation();
+		</script>				
+	</body>
+</html>
