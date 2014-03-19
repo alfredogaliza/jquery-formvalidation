@@ -1,0 +1,32 @@
+{
+    "name": "formvalidation",
+    "version": "1.0.1",
+    "title": "FormValidation",
+    "author": {
+        "name": "Luiz Alfredo Galiza",
+        "email": "alfredogaliza@gmail.com"
+    },
+    "licenses": [
+        {
+            "type": "GPLv2",
+            "url": "http://www.example.com/licenses/gpl.html"
+        }
+    ],
+    "dependencies": {
+		"jquery": ">1.5"
+    },
+    "description": "Plugin para validação de formulários através da inserção de tags. É possível mostrar mensagens de erros personalizadas.",
+    "keywords": [
+        "validation",
+        "form",
+        "field",
+        "submit",
+        "error"
+    ],
+    "maintainers": [
+        {
+            "name": "Luiz Alfredo Galiza",
+            "email": "alfredogaliza@gmail.com"
+        }
+    ]
+}
