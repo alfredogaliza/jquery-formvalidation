@@ -1,0 +1,26 @@
+body {
+	text-align: center;
+}
+
+h2 {
+	margin: 20px auto;
+}
+table {
+	margin: auto;
+	padding: 4px;
+	background-color: lightgray;
+	border-radius: 10px; 
+}
+table td {
+	text-align: left;
+	margin: 10px;
+	border: none;
+	padding: 4px;
+	background-color: gray;
+	color: black;
+	border-radius: 4px;
+}
+
+.validator {
+	display: none;
+}	

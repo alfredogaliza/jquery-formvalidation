@@ -1,98 +1,172 @@
-(function($){
+/**
+ * FormValidation Plugin for jQuery 1.5
+ * @author Luiz Alfredo Galiza
+ * @verison 2.0.1
+ */
+(function($){	
 	
+	/**
+	 * Configurações padrão utilizadas no Plugin
+	 */
 	$.validationSettings =  {
-		css: {color: "red",	fontSize: "x-small"	},
-		selector: ".validator",
-		onblur: true
+		selector:		".validator",
+		verifyOnBlur:	true,
+		verifyOnSubmit:	true,
+		cssOnValidated:	{display: "none"},
+		cssOnFail:		{display: "block", color: "red", fontSize: "x-small"},		
+		onValidated:	function(validator){},
+		onFail:			function(validator){},
+		onSubmit:		function(form){return true;}
 	};
 	
-	$.fn.validators = function(options){
-		var settings = $.extend($.validationSettings, options);
-		var id = $(this).attr("id");
-		$(settings.selector+"[data-element="+id+"]");
-		return $(settings.selector+"[data-element="+id+"]");
+	/**
+	 * Altera as configurações de validação
+	 * @param options Object Configurações que serão mescladas com o padrão.
+	 * @return Object As configurações atuais modificadas.
+	 */
+	$.validationOptions = function(options){
+		$.validationSettings = $.extend($.validationSettings, options);
+		return $.validationSettings;
 	};
 	
-	$.fn.formValidation = function(options){		
+	/**
+	 * Função que retorna todos os validadores de um campo específico.
+	 * Caso haja mais de um campo especificado, serão retornados
+	 * somente os validadores do primeiro campo.
+	 * @param options Object Query dos validadores( formato: {selector: ".selector"} )
+	 * @returns jQuery
+	 */
+	$.fn.validators = function(){
+		var settings = $.validationSettings;
+		return $(settings.selector+
+				"[data-element="+$(this).attr("id")+"]");
+	};
+	
+	/**
+	 * Ativador da validação dos campos.
+	 * Os campos somente serão avaliados em dois momentos: em onBlur, quando
+	 * o campo perde o foco (padrão) e em onSubmit, antes do envio do formulário.
+	 * Se a função onSubmit retornar true, então o formulário é enviado.
+	 * @param options Object Configurações do plugin
+	 * @returns jQuery
+	 */	
+	$.fn.formValidation = function(options){
 		
-		var settings = $.extend($.validationSettings, options);
-		var validators = $(settings.selector, this);
+		var settings = $.extend($.validationSettings, options);	
 		
-		validators.css(settings.css).hide();
-		
-		if (settings.onblur){
-			$("input,textarea,select", this).blur(function(){
-				$(this).validators().each(function(){
-					$(this).verify();
+		this.each(function(){
+			
+			var validators = $(settings.selector, this);
+			
+			if (settings.verifyOnBlur){
+				$("input,textarea,select", this).blur(function(){
+					$(this).validators().verify();
 				});
-			});
-		}
-		
-		$(this).submit(function(){
-			var success = true;
-			validators.each(function(){
-				success = $(this).verify() && success;
-			});
-			return success;
+			}			
+			
+			$(this).submit(function(event){		
+				
+				var verified = true;
+				
+				if (settings.verifyOnSubmit){
+					verified = validators.verify();
+				}
+				return verified && settings.onSubmit(this);
+				
+			});		
 		});
 		
 		return this;
 	};
 	
+	/**
+	 * Verificador de validador.
+	 * Esta função observa se os validadores especificados são atendidos.
+	 * Se algum validador não for atendido, ele será mostrado pelo método .show()
+	 * Em caso de verificação positiva em todos, é retornado true,
+	 * caso contrário, false.
+	 * @returns boolean true, em caso de sucesso, ou false, caso contrário.
+	 */
 	$.fn.verify = function(){
 		
-		var type = $(this).attr("data-type");
-		var element = $(this).attr("data-element");		
-		var max = parseFloat($(this).attr("data-max"));
-		var min = parseFloat($(this).attr("data-min"));
-		var ref = $(this).attr("data-ref");
+		var success = true;
+		var settings = $.validationSettings;
 		
-		var sValue = $("#"+element).val();
-		var iValue = parseInt(sValue);			
+		this.each(function(){
+			
+			var type = $(this).attr("data-type");
+			var element = $(this).attr("data-element");		
+			var max = parseFloat($(this).attr("data-max"));
+			var min = parseFloat($(this).attr("data-min"));
+			var ref = $(this).attr("data-ref");
+			var mask = new RegExp($(this).attr("data-mask"));
+			
+			var sValue = $("#"+element).val();
+			var iValue = parseInt(sValue);			
+			
+			var validated = false;
+			 
+			switch(type){
+				case "email":
+					validated = /([a-z0-9\.\-_]+)(\@)(\w+)(\.)(([a-z0-9\-_]+)(\.))*([a-z0-9]+)/.test(sValue);					
+					break;
+				case "natural":
+					validated = /[0-9]+/.test(sValue);
+					break;
+				case "integer":
+					validated = /[+\-]?[0-9]+/.test(sValue);
+					break;
+				case "float":
+					validated = /[\+\-]?[0-9]+(\.[0-9]+)?(E([\+\-]?[0-9]+))?/.test(sValue);
+					break;
+				case "mask":
+					validated = mask.test(sValue);
+					break;
+				case "required":
+					validated = (sValue != "" && sValue != null && sValue != undefined)? true : false;
+					break;
+				case "checked":
+					value = $("#"+element+":checked").val();
+					validated = (value != "" && value != null && value != undefined)? true : false;
+					break;
+				case "equals":
+					validated = (sValue == ref);
+					break;
+				case "different":
+					validated = (sValue != ref);
+					break;
+				case "range-value":
+					validated = (iValue >= min && iValue <= max)? true: false;
+					break;
+				case "max-value":
+					validated = (iValue <= max)? true: false;
+					break;
+				case "min-value":
+					validated = (iValue >= min)? true: false;
+					break;
+				case "range-length":
+					validated = (sValue.length >= min && sValue.length <= max)? true: false;
+					break;
+				case "max-length":
+					validated = (sValue.length <= max)? true: false;
+					break;
+				case "min-length":
+					validated = (sValue.length >= min)? true: false;
+					break;
+			}
+			
+			if (validated) {
+				$(this).css(settings.cssOnValidated);
+				settings.onValidated(this);
+			} else {
+				$(this).css(settings.cssOnFail);
+				settings.onFail(this);
+			}			
+			success = success && validated;			
+			
+		});
 		
-		var validated = false;
-		 
-		switch(type){
-			case "required":
-				validated = (sValue != "" && sValue != null && sValue != undefined)? true : false;
-				break;
-			case "checked":
-				value = $("#"+element+":checked").val();
-				validated = (value != "" && value != null && value != undefined)? true : false;
-				break;
-			case "equals":
-				validated = (sValue == ref);
-				break;
-			case "different":
-				validated = (sValue != ref);
-				break;
-			case "range-value":
-				validated = (iValue >= min && iValue <= max)? true: false;
-				break;
-			case "max-value":
-				validated = (iValue <= max)? true: false;
-				break;
-			case "min-value":
-				validated = (iValue >= min)? true: false;
-				break;
-			case "range-length":
-				validated = (sValue.length >= min && sValue.length <= max)? true: false;
-				break;
-			case "max-length":
-				validated = (sValue.length <= max)? true: false;
-				break;
-			case "min-length":
-				validated = (sValue.length >= min)? true: false;
-				break;
-		}
-				
-		if (validated) {
-			$(this).hide();			
-		} else {
-			$(this).show();
-		}
-		
-		return validated;
+		return success;
 		
 	};		
 	
