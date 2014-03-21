@@ -9,14 +9,45 @@
 	 * Configurações padrão utilizadas no Plugin
 	 */
 	$.validationSettings =  {
+		//Seletor jQuery que será utlizado para identificar os validadores
 		selector:		".validator",
+		
+		//Executa a verificação no evento onBlur do campo do formulário
 		verifyOnBlur:	true,
+		
+		//Executa a verificação dos campos no momento do envio do formulário
 		verifyOnSubmit:	true,
-		cssOnValidated:	{display: "none"},
-		cssOnFail:		{display: "block", color: "red", fontSize: "x-small"},		
-		onValidated:	function(validator){},
-		onFail:			function(validator){},
-		onSubmit:		function(form){return true;}
+		
+		//Estilo aplicado ao validador quando este é verificado positivamente
+		cssOnValidated:	{
+			display: "none"
+		},
+		
+		//Estilo aplicado ao validador quando este é verificado negativamente
+		cssOnFail:		{
+			display:  "block",
+			color:    "red",
+			fontSize: "x-small"
+		},
+		
+		//Callback acionado no momento em que o validador é acionado positivamente.
+		//O parâmetro validator é o objeto jQuery referente ao validador em questão. 
+		onValidated:	function(validator){
+			return;
+		},
+		
+		//Callback acionado no momento em que o validador é acionado negativamente.
+		//O parâmetro validator é o objeto jQuery referente ao validador em questão. 	
+		onFail:			function(validator){
+			return;
+		},
+		
+		//calback acionado quando todos os validadores são verificados
+		//positivamente. A função deverá retornar true para que os dados sejam
+		//enviados. O parâmetro form se refere ao objeto jQuery do formulário.
+		onSubmit:		function(form){
+			return true;
+		}
 	};
 	
 	/**
@@ -52,7 +83,7 @@
 	 */	
 	$.fn.formValidation = function(options){
 		
-		var settings = $.extend($.validationSettings, options);	
+		settings = $.validationOptions(options);
 		
 		this.each(function(){
 			
